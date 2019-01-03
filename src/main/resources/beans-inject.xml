@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans  http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context    http://www.springframework.org/schema/context/spring-context.xsd
+           http://www.springframework.org/schema/aop    http://www.springframework.org/schema/aop/spring-aop.xsd" >
+
+    <bean id="teachServiceImpl" class="com.china.only.teacher.service.impl.TeachServiceImpl">
+        <property name="dao" ref="teacherDao"/>
+        <property name="id" value="16000998977887" />
+        <property name="code" value="6659866" />
+        <property name="here" value="true" />
+    </bean>
+    <bean id="teacherDao" class="com.china.only.teacher.dao.impl.TeacherDaoImpl" ></bean><!--可以使被注入的对象放到后面-->
+</beans>

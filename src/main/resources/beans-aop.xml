@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans  http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context    http://www.springframework.org/schema/context/spring-context.xsd
+           http://www.springframework.org/schema/aop    http://www.springframework.org/schema/aop/spring-aop.xsd" >
+           <!-- 要添加最后2行 -->
+
+    <bean id="logInterceptor" class="com.china.only.student.LoginInterceptor"></bean>
+    <bean id="courseService" class="com.china.only.student.service.impl.CourseServiceImpl"></bean>
+    <aop:config>
+        <aop:pointcut expression="execution(public * com.china.only.student.service..*.*(..))" id="servicePointcut"/>
+        <aop:aspect id="logAspect" ref="logInterceptor">
+            <aop:before pointcut-ref="servicePointcut" method="doAccessCheck" />
+            <aop:after-returning pointcut-ref="servicePointcut"  method="doAfterReturning" />
+            <aop:after-throwing pointcut-ref="servicePointcut"  method="doAfterThrowing" />
+            <aop:around pointcut-ref="servicePointcut" method="doAround" />
+            <aop:after pointcut-ref="servicePointcut" method="doAfter" />
+        </aop:aspect>
+
+    </aop:config>
+
+    <bean id="loginMethodsAdvices" class="com.china.only.student.LoginMethodsAdvices"></bean>
+    <!-- 基于ProxyFactoryBean的spring AOP创建-->
+    <bean id="myAOP" class="org.springframework.aop.framework.ProxyFactoryBean" >
+        <property name="target">
+            <bean class="com.china.only.user.service.impl.LoginServiceImpl"></bean>
+        </property>
+        <property name="interfaces">
+            <list>
+                <value>com.china.only.user.service.LoginService</value>
+            </list>
+        </property>
+        <property name="interceptorNames">
+            <list>
+                <value>loginMethodsAdvices</value>
+            </list>
+        </property>
+    </bean>
+</beans>

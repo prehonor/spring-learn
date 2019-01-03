@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans  http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context    http://www.springframework.org/schema/context/spring-context.xsd
+           http://www.springframework.org/schema/aop    http://www.springframework.org/schema/aop/spring-aop.xsd" >
+           <!-- 要添加最后2行 -->
+
+
+    <bean id="logInterceptor" class="com.china.only.student.LoginInterceptor"></bean>
+    <aop:config>
+        <aop:pointcut expression="execution(public * com.china.only.student.service..*.*(..))" id="servicePointcut"/>
+        <!-- execution(public * com.china.only.student.service..*.*(..))
+         execution(public * com.china.only.student.service.impl..*.*(..))-->
+        <aop:aspect id="logAspect" ref="logInterceptor">
+            <aop:before pointcut-ref="servicePointcut" method="doAccessCheck" />
+            <aop:after-returning pointcut-ref="servicePointcut"  method="doAfterReturning" />
+            <aop:after-throwing pointcut-ref="servicePointcut"  method="doAfterThrowing" />
+            <aop:around pointcut-ref="servicePointcut" method="doAround" />
+            <aop:after pointcut-ref="servicePointcut" method="doAfter" />
+        </aop:aspect>
+
+    </aop:config>
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <!--   定义数据库驱动-->
+        <property name="driverClassName"><value>com.mysql.jdbc.Driver</value></property>
+        <!--   定义数据库url-->
+        <property name="url"><value>jdbc:mysql://localhost:3306/sina?serverTimezone=GMT</value></property>
+        <!--   定义数据库用户名-->
+        <property name="username"><value>root</value></property>
+        <!--   定义数据库密码-->
+        <property name="password"><value>root</value></property>
+    </bean>
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    <bean id="courseService" class="com.china.only.student.service.impl.CourseServiceImpl"></bean>
+    <bean id="courseServiceWithTrans" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <!--   为事务代理bean注入事务管理器-->
+        <property name="transactionManager"><ref bean="transactionManager"/></property>
+        <!--   设置事务属性-->
+        <property name="transactionAttributes">
+            <props>
+            <!--   所有以find开头的方法，采用required的事务策略，并且只读-->
+            <prop key="query*">PROPAGATION_REQUIRED,readOnly</prop>
+            <!--   其他方法，采用required的事务策略 -->
+                <prop key="*">PROPAGATION_REQUIRED</prop>
+            </props>
+        </property>
+
+        <!-- 为事务代理bean设置目标bean -->
+        <property name="target">
+            <ref bean="courseService"/>
+        </property>
+    </bean>
+</beans>
